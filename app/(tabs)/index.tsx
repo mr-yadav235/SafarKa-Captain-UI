@@ -1,75 +1,81 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Switch, Platform } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 export default function HomeScreen() {
+  const [online, setOnline] = useState(false);
+  const [region, setRegion] = useState<{
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const current = await Location.getCurrentPositionAsync({});
+      setRegion({
+        latitude: current.coords.latitude,
+        longitude: current.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    })();
+  }, []);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      {region && (
+        <MapView style={StyleSheet.absoluteFill} initialRegion={region}>
+          <Marker coordinate={{ latitude: region.latitude, longitude: region.longitude }} />
+        </MapView>
+      )}
+      <View style={styles.topBar}>
+        <Text style={styles.title}>Captain</Text>
+        <View style={styles.row}>
+          <Text style={{ color: online ? '#16a34a' : '#ef4444', fontWeight: '600', marginRight: 8 }}>
+            {online ? 'Online' : 'Offline'}
+          </Text>
+          <Switch value={online} onValueChange={setOnline} />
+        </View>
+      </View>
+      {!online && (
+        <View style={styles.overlay}>
+          <Text style={styles.overlayText}>Go Online to receive ride requests</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: { flex: 1, backgroundColor: '#000' },
+  topBar: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 30,
+    left: 16,
+    right: 16,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 12,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  title: { color: 'white', fontSize: 18, fontWeight: '700' },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  overlay: {
     position: 'absolute',
+    bottom: 40,
+    left: 16,
+    right: 16,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 14,
+    borderRadius: 12,
+    alignItems: 'center',
   },
+  overlayText: { color: 'white', fontWeight: '600' },
 });

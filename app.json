@@ -9,14 +9,32 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We use your location to show nearby trips and navigation.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "We use your location for live tracking during active trips.",
+        "NSLocationAlwaysUsageDescription": "We use your location for live tracking during active trips."
+      },
+      "config": {
+        "googleMapsApiKey": ""
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -33,7 +51,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-location"
     ],
     "experiments": {
       "typedRoutes": true
