@@ -10,13 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.iamyadav.SafarKaCaptain",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We use your location to show nearby trips and navigation.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "We use your location for live tracking during active trips.",
         "NSLocationAlwaysUsageDescription": "We use your location for live tracking during active trips."
       },
       "config": {
-        "googleMapsApiKey": ""
+        "googleMapsApiKey": "REDACTED_API_KEY"
       }
     },
     "android": {
@@ -28,13 +29,16 @@
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "FOREGROUND_SERVICE"
+        "FOREGROUND_SERVICE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
       "config": {
         "googleMaps": {
-          "apiKey": ""
+          "apiKey": "REDACTED_API_KEY"
         }
-      }
+      },
+      "package": "com.iamyadav.SafarKaCaptain"
     },
     "web": {
       "bundler": "metro",
@@ -52,10 +56,18 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-location"
+      "expo-location",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "apiUrl": "",
+      "router": {},
+      "eas": {
+        "projectId": "a22bd20d-b231-4214-a686-f0d7971b27a8"
+      }
     }
   }
 }
