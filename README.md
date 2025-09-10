@@ -48,3 +48,30 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Environment Variables
+
+This project requires environment variables for API keys and configuration.
+
+### Setup
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Update the `.env` file with your actual values:
+   - `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`: Your Google Maps API key
+   - `EXPO_PUBLIC_API_URL`: Your backend API URL
+
+### Getting Google Maps API Key
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Maps SDK for Android and iOS
+4. Create credentials (API Key)
+5. Restrict the API key to your app's bundle identifier
+
+### Security Note
+
+Never commit your `.env` file to version control. The `.env` file is already included in `.gitignore`.

@@ -17,7 +17,7 @@
         "NSLocationAlwaysUsageDescription": "We use your location for live tracking during active trips."
       },
       "config": {
-        "googleMapsApiKey": "REDACTED_API_KEY"
+        "googleMapsApiKey": "$EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
       }
     },
     "android": {
@@ -35,7 +35,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "REDACTED_API_KEY"
+          "apiKey": "$EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
         }
       },
       "package": "com.iamyadav.SafarKaCaptain"
