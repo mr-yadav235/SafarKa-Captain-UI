@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, Alert } from 'react-native';
 import { Link } from 'expo-router';
 import { useAuthStore } from '@/store/authStore';
+// import { reconnectWithToken } from '@/lib/socketClient'; // Removed - WebSocket should only connect when captain goes online
 
 export default function LoginScreen() {
   const [phone_number, setPhone_number] = useState('');
@@ -15,6 +16,9 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       await login(phone_number, password);
+      
+      // WebSocket will connect only when captain goes online
+      console.log('✅ Captain logged in successfully - WebSocket will connect when going online');
     } catch (e: any) {
       console.error('Login error:', e);
       Alert.alert('Login failed', e?.response?.data?.message || e?.message || 'Please try again');

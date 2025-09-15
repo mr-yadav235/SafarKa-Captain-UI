@@ -6,6 +6,18 @@ type User = {
   id: string;
   name: string;
   phone: string;
+  email?: string;
+  license_number?: string;
+  current_vehicle?: {
+    id: number;
+    vehicle_type: string;
+    make: string;
+    model: string;
+    year?: number;
+    color: string;
+    plate_number: string;
+    capacity: number;
+  };
 };
 
 type AuthState = {
@@ -58,11 +70,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.log('✅ Login response:', res.data);
       const { token, captain } = res.data.data;
 
-      // map captain -> User
+      // map captain -> User with complete profile
       const user: User = {
-        id: captain.captain_id,
+        id: captain.id,
         name: captain.name,
-        phone: captain.phone_number
+        phone: captain.phone_number,
+        email: captain.email,
+        license_number: captain.license_number,
+        current_vehicle: captain.current_vehicle
       };
       console.log('👤 Mapped user:', user);
       console.log('🔑 Received token:', token ? `${token.substring(0, 20)}...` : 'null');
@@ -108,4 +123,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
+// Export getToken function for WebSocket client
+export const getToken = () => {
+  const state = useAuthStore.getState();
+  return state.token;
+};
 
+// Export getCaptainProfile function for location updates
+export const getCaptainProfile = () => {
+  const state = useAuthStore.getState();
+  const user = state.user;
+  if (!user) return null;
+  
+  return {
+    name: user.name,
+    phone_number: user.phone,
+    email: user.email || '',
+    license_number: user.license_number || '',
+    current_vehicle: user.current_vehicle
+  };
+};

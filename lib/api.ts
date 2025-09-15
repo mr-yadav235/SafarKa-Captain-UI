@@ -69,6 +69,13 @@ export const CaptainApi = {
     api.post(`/rides/${rideId}/location`, { latitude: lat, longitude: lng, speed }),
 };
 
+export const VehicleApi = {
+  getMyVehicles: () => api.get('/vehicles/my-vehicles'),
+  getCurrentVehicle: () => api.get('/vehicles/current'),
+  setCurrentVehicle: (vehicleId: number) => api.post('/vehicles/set-current', { vehicle_id: vehicleId }),
+  registerVehicle: (vehicleData: any) => api.post('/vehicles/register', vehicleData),
+};
+
 export const AuthApi = {
   login: (payload: { phone_number: string; password: string }) => api.post('/captains/login',  payload),
   register: (payload: { name: string; phone_number: string; password: string; vehicleNumber?: string }) =>
