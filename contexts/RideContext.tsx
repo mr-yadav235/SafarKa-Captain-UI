@@ -12,7 +12,7 @@ interface RideContextType {
   
   // Actions
   getPendingRides: () => Promise<void>;
-  acceptRide: (rideId: number) => Promise<boolean>;
+  acceptRide: (rideId: number, captainId: number) => Promise<boolean>;
   updateRideStatus: (rideId: number, status: string) => Promise<boolean>;
   getMyRides: (captain_id: number) => Promise<void>;
   getRideHistory: (page?: number, limit?: number, status?: string) => Promise<void>;
@@ -65,12 +65,12 @@ export const RideProvider: React.FC<RideProviderProps> = ({ children }) => {
     }
   };
 
-  const acceptRide = async (rideId: number): Promise<boolean> => {
+  const acceptRide = async (rideId: number, captainId: number): Promise<boolean> => {
     try {
-      console.log('RideContext acceptRide called with rideId:', rideId);
+      console.log('RideContext acceptRide called with rideId:', rideId, 'captainId:', captainId);
       setLoading(true);
       setError(null);
-      const ride = await RideService.acceptRide(rideId);
+      const ride = await RideService.acceptRide(rideId, captainId);
       console.log('RideService.acceptRide returned:', ride);
       setCurrentRide(ride);
       console.log('RideContext acceptRide success, returning true');

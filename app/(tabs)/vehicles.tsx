@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, StyleSheet } from 'react-native';
 import { VehicleApi } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 
 interface Vehicle {
   id: number;
@@ -17,6 +18,7 @@ interface Vehicle {
 }
 
 export default function VehiclesScreen() {
+  const { updateCurrentVehicle } = useAuthStore();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [currentVehicle, setCurrentVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,10 +42,8 @@ export default function VehiclesScreen() {
     try {
       setLoading(true);
       const response = await VehicleApi.getMyVehicles();
-      console.log('Vehicles response:', response.data);
       setVehicles(response.data?.data || response.data || []);
     } catch (error) {
-      console.error('Error fetching vehicles:', error);
       Alert.alert('Error', 'Failed to fetch vehicles');
     } finally {
       setLoading(false);
@@ -53,10 +53,8 @@ export default function VehiclesScreen() {
   const fetchCurrentVehicle = async () => {
     try {
       const response = await VehicleApi.getCurrentVehicle();
-      console.log('Current vehicle response:', response.data);
       setCurrentVehicle(response.data?.data || response.data || null);
     } catch (error) {
-      console.error('Error fetching current vehicle:', error);
       // Don't show alert for this as it's expected if no vehicle is set
     }
   };
@@ -65,10 +63,29 @@ export default function VehiclesScreen() {
     try {
       setLoading(true);
       await VehicleApi.setCurrentVehicle(vehicleId);
+      
+      // Find the vehicle that was set as current
+      const selectedVehicle = vehicles.find(v => v.id === vehicleId);
+      if (selectedVehicle) {
+        // Update auth store with the new current vehicle
+        const vehicleData = {
+          id: selectedVehicle.id,
+          vehicle_type: selectedVehicle.vehicle_type || 'car',
+          make: selectedVehicle.make,
+          model: selectedVehicle.model,
+          year: selectedVehicle.year,
+          color: selectedVehicle.color,
+          plate_number: selectedVehicle.plate_number,
+          capacity: selectedVehicle.capacity,
+        };
+        
+        console.log("🚗 Updating auth store with vehicle data:", vehicleData);
+        await updateCurrentVehicle(vehicleData);
+      }
+      
       Alert.alert('Success', 'Current vehicle updated successfully');
       fetchCurrentVehicle();
     } catch (error) {
-      console.error('Error setting current vehicle:', error);
       Alert.alert('Error', 'Failed to set current vehicle');
     } finally {
       setLoading(false);
@@ -97,7 +114,6 @@ export default function VehiclesScreen() {
       });
       fetchVehicles();
     } catch (error) {
-      console.error('Error adding vehicle:', error);
       Alert.alert('Error', 'Failed to add vehicle');
     } finally {
       setLoading(false);

@@ -28,6 +28,7 @@ type AuthState = {
   login: (phone_number: string, password: string) => Promise<void>;
   register: (payload: { name: string; phone_number: string; password: string; vehicleNumber?: string }) => Promise<void>;
   logout: () => Promise<void>;
+  updateCurrentVehicle: (vehicle: User['current_vehicle']) => Promise<void>;
 };
 
 const TOKEN_KEY = 'auth_token';
@@ -40,34 +41,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   hydrate: async () => {
     set({ loading: true });
     try {
-      console.log('🔄 Hydrating auth state...');
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
       const userJson = await SecureStore.getItemAsync(USER_KEY);
-      console.log('🔍 Retrieved token:', token ? `${token.substring(0, 20)}...` : 'null');
-      console.log('🔍 Retrieved user:', userJson ? 'exists' : 'null');
       
       if (!token || !userJson) {
-        console.log('❌ No token or user found, skipping hydration');
         set({ loading: false });
         return;
       }
       
-      console.log('✅ Setting auth token from hydration');
       setAuthToken(token);
       const user = JSON.parse(userJson) as User;
       set({ user, token, loading: false });
-      console.log('✅ Auth state hydrated successfully');
     } catch (error) {
-      console.error('❌ Hydrate error:', error);
       set({ loading: false });
     }
   },
   login: async (phone_number, password) => {
     set({ loading: true });
     try {
-      console.log('🔐 Attempting login...');
       const res = await AuthApi.login({ phone_number, password });
-      console.log('✅ Login response:', res.data);
       const { token, captain } = res.data.data;
 
       // map captain -> User with complete profile
@@ -79,18 +71,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         license_number: captain.license_number,
         current_vehicle: captain.current_vehicle
       };
-      console.log('👤 Mapped user:', user);
-      console.log('🔑 Received token:', token ? `${token.substring(0, 20)}...` : 'null');
       
       await SecureStore.setItemAsync(TOKEN_KEY, token);
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
-      console.log('💾 Token and user saved to SecureStore');
       
       setAuthToken(token);
       set({ token, user });
-      console.log('✅ Auth state set with user:', user);
     } catch (error) {
-      console.error('❌ Auth store login error:', error);
       throw error;
     } finally {
       set({ loading: false });
@@ -100,10 +87,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const res = await AuthApi.register(payload);
-      console.log('Register response:', res.data);
       return res.data; // just return the response
     } catch (error) {
-      console.error('Auth store register error:', error);
       throw error;
     } finally {
       set({ loading: false });
@@ -116,9 +101,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       setAuthToken(undefined);
       set({ user: undefined, token: undefined });
     } catch (error) {
-      console.error('Logout error:', error);
       // Even if there's an error, clear the state
       set({ user: undefined, token: undefined });
+    }
+  },
+  updateCurrentVehicle: async (vehicle) => {
+    try {
+      const { user } = get();
+      if (!user) {
+        console.log("❌ updateCurrentVehicle: No user in auth store");
+        return;
+      }
+      
+      console.log("🔄 updateCurrentVehicle: Updating with vehicle:", vehicle);
+      console.log("🔄 updateCurrentVehicle: Current user before update:", user);
+      
+      // Update user object with new current vehicle
+      const updatedUser = { ...user, current_vehicle: vehicle };
+      
+      console.log("🔄 updateCurrentVehicle: Updated user:", updatedUser);
+      
+      // Save to SecureStore
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updatedUser));
+      
+      // Update state
+      set({ user: updatedUser });
+      
+      console.log("✅ updateCurrentVehicle: Auth store updated successfully");
+    } catch (error) {
+      console.error("❌ updateCurrentVehicle: Failed to update:", error);
     }
   },
 }));
@@ -133,13 +144,21 @@ export const getToken = () => {
 export const getCaptainProfile = () => {
   const state = useAuthStore.getState();
   const user = state.user;
-  if (!user) return null;
+  if (!user) {
+    console.log("❌ getCaptainProfile: No user in auth store");
+    return null;
+  }
   
-  return {
+  const profile = {
     name: user.name,
     phone_number: user.phone,
     email: user.email || '',
     license_number: user.license_number || '',
     current_vehicle: user.current_vehicle
   };
+  
+  console.log("👤 getCaptainProfile: Returning profile:", profile);
+  console.log("👤 getCaptainProfile: Current vehicle details:", user.current_vehicle);
+  
+  return profile;
 };

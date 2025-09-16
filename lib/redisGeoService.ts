@@ -72,9 +72,18 @@ export const RedisGeoService = {
       };
       
       await axios.post(`${API_BASE}/captains/${captainId}/location`, requestBody);
-      console.log("🔍 Request body:", requestBody);
+      console.log("🔍 RedisGeoService - Request body:", JSON.stringify(requestBody, null, 2));
       console.log("✅ Redis updated for captain", captainId, "with profile:", captainProfile ? "✅" : "❌");
       console.log("🚗 Current vehicle:", captainProfile?.current_vehicle ? "✅" : "❌");
+      if (captainProfile?.current_vehicle) {
+        console.log("🚗 Vehicle details being sent:", {
+          id: captainProfile.current_vehicle.id,
+          vehicle_type: captainProfile.current_vehicle.vehicle_type,
+          make: captainProfile.current_vehicle.make,
+          model: captainProfile.current_vehicle.model,
+          plate_number: captainProfile.current_vehicle.plate_number
+        });
+      }
     } catch (err) {
       console.error("❌ Redis update failed", err);
     }

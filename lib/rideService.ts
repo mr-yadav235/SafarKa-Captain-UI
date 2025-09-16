@@ -1,4 +1,7 @@
 import { api } from './api';
+import axios from 'axios';
+
+const REDIS_API_BASE = "http://192.168.1.54:5002"; // Redis microservice
 
 export interface RideRequest {
   id: number;
@@ -166,15 +169,21 @@ export const RideService = {
 
   */
 
-  // Accept a ride request
-  acceptRide: async (rideId: number): Promise<Ride> => {
-    console.log('RideService acceptRide called with rideId:', rideId);
-    console.log('Making API call to:', `/rides/${rideId}/accept`);
-    const response = await api.post(`/rides/${rideId}/accept`);
-    console.log('Accept ride API response:', response.data);
-    const result = response.data?.data || response.data;
-    console.log('Accept ride result:', result);
-    return result;
+  // Accept a ride request via Redis service
+  acceptRide: async (rideId: number, captainId: number): Promise<any> => {
+    console.log('RideService acceptRide called with rideId:', rideId, 'captainId:', captainId);
+    console.log('Making Redis API call to:', `${REDIS_API_BASE}/rides/${rideId}/accept`);
+    
+    try {
+      const response = await axios.post(`${REDIS_API_BASE}/rides/${rideId}/accept`, {
+        captainId: captainId
+      });
+      console.log('Accept ride Redis API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Accept ride Redis API error:', error);
+      throw error;
+    }
   },
 
   // Update ride status
@@ -183,10 +192,53 @@ export const RideService = {
     return response.data?.data || response.data;
   },
 
-  // Get ride details
-  getRide: async (rideId: number): Promise<Ride> => {
-    const response = await api.get(`/rides/${rideId}`);
-    return response.data?.data || response.data;
+  // Get ride details via Redis service
+  getRide: async (rideId: number): Promise<any> => {
+    console.log('RideService getRide called with rideId:', rideId);
+    console.log('Making Redis API call to:', `${REDIS_API_BASE}/rides/${rideId}`);
+    
+    try {
+      const response = await axios.get(`${REDIS_API_BASE}/rides/${rideId}`);
+      console.log('Get ride Redis API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Get ride Redis API error:', error);
+      throw error;
+    }
+  },
+
+  // Start a ride via Redis service
+  startRide: async (rideId: number, captainId: number): Promise<any> => {
+    console.log('RideService startRide called with rideId:', rideId, 'captainId:', captainId);
+    console.log('Making Redis API call to:', `${REDIS_API_BASE}/rides/${rideId}/start`);
+    
+    try {
+      const response = await axios.post(`${REDIS_API_BASE}/rides/${rideId}/start`, {
+        captainId: captainId
+      });
+      console.log('Start ride Redis API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Start ride Redis API error:', error);
+      throw error;
+    }
+  },
+
+  // End a ride via Redis service
+  endRide: async (rideId: number, captainId: number): Promise<any> => {
+    console.log('RideService endRide called with rideId:', rideId, 'captainId:', captainId);
+    console.log('Making Redis API call to:', `${REDIS_API_BASE}/rides/${rideId}/end`);
+    
+    try {
+      const response = await axios.post(`${REDIS_API_BASE}/rides/${rideId}/end`, {
+        captainId: captainId
+      });
+      console.log('End ride Redis API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('End ride Redis API error:', error);
+      throw error;
+    }
   },
 
   // Get captain's assigned rides (same as getRideHistory but with different return structure)
